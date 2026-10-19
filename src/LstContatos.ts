@@ -1,186 +1,215 @@
 import { Contato } from "./Contato";
+import { IComparable } from "./IComparable";
 
-export class LstContatos {
-    private _elemento: Contato | null;
-    private _sucessor: LstContatos | null;
-    private _length: number;
+class NoDuplo<T> {
+    public previous: NoDuplo<T> | null = null;
+    public next: NoDuplo<T> | null = null;
 
-    constructor(objContato?: Contato) {
-        if (objContato == undefined) {
-            this._length = 0;
-            this._elemento = null;
-            this._sucessor = null;
-        } else {
+    constructor(public element: T) {}
+}
+
+export class LstContatos<T extends IComparable = Contato> {
+    private _head: NoDuplo<T> | null = null;
+    private _tail: NoDuplo<T> | null = null;
+    private _length = 0;
+
+    constructor(element?: T) {
+        if (element !== undefined) {
+            const node = new NoDuplo(element);
+            this._head = node;
+            this._tail = node;
             this._length = 1;
-            this._elemento = objContato;
-            this._sucessor = null;
+        }else if (element === undefined) {
+            this._head = null;
+            this._tail = null;
+            this._length = 0;
         }
     }
 
     public get length(): number {
         return this._length;
     }
-    public set length(value: number) {
-        this._length = value;
-    }
 
-    public push(objContato: Contato): void {
-        if (this._length == 0) {
-            this._elemento = objContato;
+    public push(objContato: T): void {
+        const node = new NoDuplo(objContato);
+        if (this._tail === null) {
+            this._head = node;
+            this._tail = node;
         } else {
-            let lstAux: LstContatos = this;
-            while (lstAux._sucessor != null) {
-                lstAux.length++;
-                lstAux = lstAux._sucessor;
-            }
-            lstAux.length++;
-            lstAux._sucessor = new LstContatos(objContato);
-        }
-    }
-
-    public unshift(objContato: Contato): void {
-        if (this._length == 0) {
-            this._elemento = objContato;
-        } else {
-            const lstAux: LstContatos = new LstContatos(this._elemento as Contato);
-            lstAux._sucessor = this._sucessor;
-            this._elemento = objContato;
-            this._sucessor = lstAux;
+            node.previous = this._tail;
+            this._tail.next = node;
+            this._tail = node;
         }
         this._length++;
     }
-    public insert(objContato: Contato, index: number): boolean {
-        if (index >= 0 && index <= this._length) {
-            if (index == 0) {
-                this.unshift(objContato);
-            } else if (index == this._length) {
-                this.push(objContato);
-            } else {
-                let lstAux: LstContatos = this;
-                for (let i = 0; i < index - 1; i++) {
-                    lstAux = lstAux._sucessor as LstContatos;
-                }
-                const lstAux2: LstContatos = new LstContatos(objContato);
-                lstAux2._sucessor = lstAux._sucessor;
-                lstAux._sucessor = lstAux2;
-                this._length++;
-            }
-            return true;
+
+    public unshift(objContato: T): void {
+        const node = new NoDuplo(objContato);
+        if (this._head === null) {
+            this._head = node;
+            this._tail = node;
+        } else {
+            node.next = this._head;
+            this._head.previous = node;
+            this._head = node;
         }
-        return false;
+        this._length++;
     }
-    public remove(objContato: Contato): boolean {
-        if (this._length > 0) {
-            if ((this._elemento as Contato).equals(objContato)) {
-                if (this._sucessor == null) {
-                    this._elemento = null;
-                } else {
-                    this._elemento = this._sucessor._elemento;
-                    this._sucessor = this._sucessor._sucessor;
-                }
-                this._length--;
-                return true;
-            } else {
-                let lstAux: LstContatos = this;
-                while (lstAux._sucessor != null) {
-                    if ((lstAux._sucessor._elemento as Contato).equals(objContato)) {
-                        lstAux._sucessor = lstAux._sucessor._sucessor;
-                        this._length--;
-                        return true;
-                    }
-                    lstAux = lstAux._sucessor;
-                }
-            }
+
+    public pop(): T {
+        if (this._tail === null) {
+            throw new RangeError("Não é possível remover o último elemento de uma lista vazia.");
         }
-        return false;
-    }
-    public search(nome: string): Contato | null {
-        let lstAux: LstContatos = this;
-        while (lstAux._elemento != null) {
-            if (lstAux._elemento.nome === nome) {
-                return lstAux._elemento;
-            }
-            lstAux = lstAux._sucessor as LstContatos;
+        const element = this._tail.element;
+        this._tail = this._tail.previous;
+        if (this._tail === null) {
+            this._head = null;
+        } else {
+            this._tail.next = null;
         }
-        return null;
+        this._length--;
+        return element;
     }
-    
-    public findIndex(objContato: Contato): number;
-    public findIndex(nome: string): number;
-    public findIndex(param: Contato | string): number {
-        let lstAux: LstContatos = this;
-        let index: number = 0;
-        if (this._length != 0) {
-            do {
-                if ((param instanceof Contato && (lstAux._elemento as Contato).equals(param)) ||
-                    (typeof param === "string" && (lstAux._elemento as Contato).nome === param) ) {
-                    return index;
-                }
-                lstAux = lstAux._sucessor as LstContatos;
-                index++;
-            } while (lstAux != null)
+
+    public shift(): T {
+        if (this._head === null) {
+            throw new RangeError("Não é possível remover o primeiro elemento de uma lista vazia.");
+        }
+        const element = this._head.element;
+        this._head = this._head.next;
+        if (this._head === null) {
+            this._tail = null;
+        } else {
+            this._head.previous = null;
+        }
+        this._length--;
+        return element;
+    }
+
+    private getNoAt(index: number): NoDuplo<T> {
+        if (!Number.isInteger(index) || index < 0 || index >= this._length) {
+            throw new RangeError("Índice fora dos limites da lista.");
+        }
+        if (index < this._length / 2) {
+            let node = this._head!;
+            for (let i = 0; i < index; i++) {
+                node = node.next!;
+            }
+            return node;
+        }
+        let node = this._tail!;
+        for (let i = this._length - 1; i > index; i--) {
+            node = node.previous!;
+        }
+        return node;
+    }
+
+    public getElementAt(index: number): T {
+        return this.getNoAt(index).element;
+    }
+
+    public insert(element: T, index: number): boolean {
+        if (!Number.isInteger(index) || index < 0 || index > this._length) {
+            return false;
+        }
+        if (index === 0) {
+            this.unshift(element);
+        } else if (index === this._length) {
+            this.push(element);
+        } else {
+            const next = this.getNoAt(index);
+            const previous = next.previous!;
+            const node = new NoDuplo(element);
+            node.previous = previous;
+            node.next = next;
+            previous.next = node;
+            next.previous = node;
+            this._length++;
+        }
+        return true;
+    }
+
+    public removeAt(index: number): T {
+        const node = this.getNoAt(index);
+        if (node.previous === null) {
+            this._head = node.next;
+        } else {
+            node.previous.next = node.next;
+        }
+        if (node.next === null) {
+            this._tail = node.previous;
+        } else {
+            node.next.previous = node.previous;
+        }
+        this._length--;
+        return node.element;
+    }
+
+    public remove(element: T): T {
+        const index = this.findIndex(element);
+        if (index === -1) {
+            throw new RangeError("O elemento não foi encontrado na lista.");
+        }
+        return this.removeAt(index);
+    }
+
+    public findIndex(element: T): number {
+        let node = this._head;
+        let index = 0;
+        while (node !== null) {
+            if (element.equals(node.element)) {
+                return index;
+            }
+            node = node.next;
+            index++;
         }
         return -1;
     }
 
-    public pop(){
-        if(this._sucessor === null){
-            return null;
-        }
-        let atual = this._sucessor;
-        while (atual._sucessor !== null) {
-            atual = atual._sucessor;
-        }
-        this.remove(atual._elemento as Contato);
-        return atual;
-    }
-    public shift(){
-       if(this._sucessor === null){ 
-            return null;
-       }
-        let atual = this._elemento;
-        this.remove(atual as Contato);
-        return atual;
-    }
-    public reverse(): LstContatos {
-        let anterior: LstContatos | null = null;
-        let atual: LstContatos | null = this;
-        let proximo: LstContatos | null = null; 
-
-        while (atual !== null) {
-            proximo = atual._sucessor; 
-            atual._sucessor = anterior; 
-            anterior = atual; 
-            atual = proximo;
-        }
-        return anterior as LstContatos;
-    }
-    public sort(): LstContatos {
-        if (this._sucessor === null) {
-            return this;
-        }
-        let proximo: LstContatos = this._sucessor;
-        this._sucessor = null;
-        let restoOrdenado: LstContatos = proximo.sort();
-        return this.inserirOrdenado(restoOrdenado, this);
+    public isEmpty(): boolean {
+        return this._length === 0;
     }
 
-    private inserirOrdenado(lista: LstContatos | null, novoNo: LstContatos): LstContatos {
-        if (lista === null || lista._elemento!.compareTo(novoNo._elemento as Contato) > 0) {
-            novoNo._sucessor = lista;
-            return novoNo;
-        }
-        lista._sucessor = this.inserirOrdenado(lista._sucessor, novoNo);
-        return lista;
-    }
     public toString(): string {
-        let lstAux: LstContatos = this;
-        let lstString: string = "";
-        while (lstAux != null && lstAux._elemento != null) {
-            lstString += `${lstAux._elemento.toString()}\n`;
-            lstAux = lstAux._sucessor as LstContatos;
+        const elements: string[] = [];
+        let node = this._head;
+        while (node !== null) {
+            elements.push(String(node.element));
+            node = node.next;
         }
-        return lstString;
+        return elements.join("\n");
     }
-    
+
+    public reverse(): void {
+        let node = this._head;
+        while (node !== null) {
+            const next = node.next;
+            node.next = node.previous;
+            node.previous = next;
+            node = next;
+        }
+        const oldHead = this._head;
+        this._head = this._tail;
+        this._tail = oldHead;
+    }
+
+    public sort(): void {
+        if (this._length < 2) {
+            return;
+        }
+        let objTrocado: boolean;
+        do {
+            objTrocado = false;
+            let noDuplo = this._head!;
+            while (noDuplo.next !== null) {
+                if (noDuplo.element.compareTo(noDuplo.next.element) > 0) {
+                    const element = noDuplo.element;
+                    noDuplo.element = noDuplo.next.element;
+                    noDuplo.next.element = element;
+                    objTrocado = true;
+                }
+                noDuplo = noDuplo.next;
+            }
+        } while (objTrocado);
+    }
 }

@@ -25,37 +25,87 @@ let lst = new LstContatos();
 
 //console.log("Lista após remoção:");
 //console.log(lst.toString());
-lst.push(new Contato("Abaporu", "5555-0099"));
-lst.push(new Contato("Ronald", "9999-9999"));
-lst.push(new Contato("Maquiavel", "5555-8888"));
-lst.push(new Contato("ALberto", "5555-7777"));
-lst.push(new Contato("Charles", "5555-6666"));
-lst.push(new Contato("Henrique", "5555-4554"));
-lst.push(new Contato("Carlos", "5555-5555"));
-lst.push(new Contato("Beatriz", "5555-4444"));
-//lst.insert(new Contato("Bruno", "4444-4444"), 2);
-//console.log("Lista após inserções de Carlos no final e de Bruno na posição 2:");
+//lst.push(new Contato("Abaporu", "5555-0099"));
+//lst.push(new Contato("Ronald", "9999-9999"));
+//lst.push(new Contato("Maquiavel", "5555-8888"));
+//lst.push(new Contato("ALberto", "5555-7777"));
+//lst.push(new Contato("Charles", "5555-6666"));
+//lst.push(new Contato("Henrique", "5555-4554"));
+//lst.push(new Contato("Carlos", "5555-5555"));
+//lst.push(new Contato("Beatriz", "5555-4444"));
+////lst.insert(new Contato("Bruno", "4444-4444"), 2);
+////console.log("Lista após inserções de Carlos no final e de Bruno na posição 2:");
+//console.log(lst.toString());
+//console.log("Iniciando método pop 1");
+//console.log(lst.pop());
+//console.log(lst.toString());
+//
+//console.log("Iniciando método pop 2");
+//console.log(lst.pop());
+//console.log(lst.toString());
+//
+//console.log("Iniciando método shift 1");
+//console.log(lst.shift());
+//console.log(lst.toString());
+//
+//console.log("Iniciando método shift 2");
+//console.log(lst.shift());
+//console.log(lst.toString());
+//
+//console.log("Invertendo a Lista");
+//lst = lst.reverse();
+//console.log(lst.toString());
+//
+//console.log("Ordenando a Lista");
+//lst = lst.sort();
+//console.log(lst.toString());
+
+
+
+lst.push(new Contato("Marcos", "2345-2345","marcos@gmail.com"));
+
+lst.unshift(new Contato("Oscar", "9999-1111","oscar@gmail.com"));
+
+lst.insert(new Contato("Ana", "1234-5678","ana@gmail.com"), 1);
+
+console.log("Lista após inserções:");
 console.log(lst.toString());
-console.log("Iniciando método pop 1");
+
+
+console.log("Elemento removido na posição 1:");
+console.log(lst.removeAt(1));
+
+
+console.log("Lista após remoção:");
+
+console.log(lst.toString());
+
+
+console.log("Índice do contato 'Oscar':");
+console.log(lst.findIndex(new Contato("Oscar", "9999-1111","oscar@gmail.com")));
+
+console.log("Lista está vazia?");
+
+console.log(lst.isEmpty());
+
+console.log("Elemento removido do final (pop):");
 console.log(lst.pop());
+console.log("Lista após pop:");
 console.log(lst.toString());
-
-console.log("Iniciando método pop 2");
-console.log(lst.pop());
-console.log(lst.toString());
-
-console.log("Iniciando método shift 1");
+console.log("Elemento removido do início (shift):");
 console.log(lst.shift());
+console.log("Lista após shift:");
 console.log(lst.toString());
-
-console.log("Iniciando método shift 2");
-console.log(lst.shift());
+console.log("Adicionando Carlos e Bruno para testar reverse e sort:");
+lst.push(new Contato("Carlos", "5555-5555","carlos@gmail.com"));
+lst.push(new Contato("Bruno", "4444-4444","bruno@gmail.com"));
+console.log("Lista antes de reverter (reverse):");
 console.log(lst.toString());
-
-console.log("Invertendo a Lista");
-lst = lst.reverse();
+ 
+console.log("Lista após reverter:");
+lst.reverse();
 console.log(lst.toString());
-
-console.log("Ordenando a Lista");
-lst = lst.sort();
+console.log("Lista após ordenar:");
+lst.sort();
 console.log(lst.toString());
+ 
